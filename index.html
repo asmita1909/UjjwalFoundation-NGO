@@ -1,0 +1,1993 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  Heart, Leaf, Users, Award, Calendar, ArrowRight, CheckCircle2, 
+  DollarSign, ShieldCheck, LogIn, UserPlus, LogOut, Menu, X, 
+  BookOpen, Activity, Globe, Sparkles, Filter, Lock, User, Mail, 
+  Phone, Key, Eye, EyeOff, LayoutDashboard, FileText, Settings, 
+  Bell, ChevronRight, Download, Plus, Check, Search, TrendingUp, 
+  Briefcase, AlertCircle, ExternalLink, RefreshCw
+} from 'lucide-react';
+
+// --- INITIAL MOCK DATA ---
+const INITIAL_PROGRAMS = [
+  {
+    id: 'prog-1',
+    title: 'Education for All',
+    category: 'Education',
+    icon: BookOpen,
+    image: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80&w=800',
+    description: 'Providing quality learning materials, scholarships, and digital literacy tools to underprivileged children in rural and suburban communities.',
+    beneficiaries: '12,500+ Children'
+  },
+  {
+    id: 'prog-2',
+    title: 'Community Healthcare',
+    category: 'Health',
+    icon: Activity,
+    image: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&q=80&w=800',
+    description: 'Organizing free mobile medical camps, maternal healthcare programs, and essential medicine distribution across vulnerable districts.',
+    beneficiaries: '45,000+ Patients'
+  },
+  {
+    id: 'prog-3',
+    title: 'Environmental Protection',
+    category: 'Environment',
+    icon: Leaf,
+    image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=800',
+    description: 'Driving massive afforestation drives, solar adoption initiatives, plastic waste management, and river cleanup campaigns.',
+    beneficiaries: '50+ Green Zones'
+  },
+  {
+    id: 'prog-4',
+    title: 'Women Empowerment',
+    category: 'Livelihood',
+    icon: Heart,
+    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=800',
+    description: 'Providing vocational skill training, financial micro-grants, and leadership workshops to foster economic self-reliance for women.',
+    beneficiaries: '3,200+ Women'
+  }
+];
+
+const INITIAL_PROJECTS = [
+  {
+    id: 'proj-1',
+    title: 'Clean Rivers Initiative',
+    location: 'Varanasi & Rishikesh',
+    status: 'Ongoing',
+    raised: 42000,
+    goal: 50000,
+    image: 'https://images.unsplash.com/photo-1621451537084-482c73073a0f?auto=format&fit=crop&q=80&w=800',
+    description: 'Restoring local aquatic ecosystems and installing smart waste filtration units along major river banks.'
+  },
+  {
+    id: 'proj-2',
+    title: 'Rural Digital Classrooms',
+    location: 'Odisha & Jharkhand',
+    status: 'Ongoing',
+    raised: 28500,
+    goal: 35000,
+    image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=800',
+    description: 'Equipping 40 rural schools with solar-powered computer labs and interactive satellite learning boards.'
+  },
+  {
+    id: 'proj-3',
+    title: 'Maternal Health Bus Network',
+    location: 'Rajasthan Remote Sectors',
+    status: 'Near Completion',
+    raised: 59000,
+    goal: 60000,
+    image: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=800',
+    description: 'Deploying custom mobile clinics fitted with ultrasound machines and telemedicine links to remote hamlets.'
+  }
+];
+
+const INITIAL_EVENTS = [
+  {
+    id: 'ev-1',
+    title: 'Annual Green Campus Plantation Drive',
+    date: '2026-11-15',
+    time: '09:00 AM - 02:00 PM',
+    location: 'Central City Park & Suburban Belts',
+    category: 'Environment',
+    description: 'Join over 500 volunteers as we aim to plant 5,000 indigenous saplings in a single day.',
+    registeredCount: 312
+  },
+  {
+    id: 'ev-2',
+    title: 'Free Mega Health & Eye Checkup Camp',
+    date: '2026-11-22',
+    time: '08:30 AM - 04:30 PM',
+    location: 'Community Center, East District',
+    category: 'Health',
+    description: 'Providing complimentary health screenings, eye tests, and prescription glasses to seniors.',
+    registeredCount: 184
+  },
+  {
+    id: 'ev-3',
+    title: 'Youth Digital Skills Workshop',
+    date: '2026-12-05',
+    time: '10:00 AM - 03:00 PM',
+    location: 'Ujjwal Innovation Lab, Sector 4',
+    category: 'Education',
+    description: 'Hands-on training session covering basic coding, graphic design, and modern web safety.',
+    registeredCount: 95
+  }
+];
+
+const INITIAL_GALLERY = [
+  { id: 'g1', title: 'Solar Classroom Launch', category: 'Education', url: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=800' },
+  { id: 'g2', title: 'Tree Plantation Drive', category: 'Environment', url: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=800' },
+  { id: 'g3', title: 'Mobile Clinic Checkup', category: 'Health', url: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&q=80&w=800' },
+  { id: 'g4', title: 'Women Micro-Grant Handover', category: 'Livelihood', url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=800' },
+  { id: 'g5', title: 'Children Library Setup', category: 'Education', url: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80&w=800' },
+  { id: 'g6', title: 'Volunteer Food Distribution', category: 'Health', url: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&q=80&w=800' },
+];
+
+const INITIAL_DONATIONS = [
+  { id: 'DON-9041', donorName: 'Sarah Jenkins', amount: 500, program: 'Education for All', date: '2026-10-20', status: 'Completed', receiptNo: 'REC-2026-094' },
+  { id: 'DON-8812', donorName: 'Ananya Sharma', amount: 1200, program: 'Community Healthcare', date: '2026-10-18', status: 'Completed', receiptNo: 'REC-2026-088' },
+  { id: 'DON-7430', donorName: 'Michael Chang', amount: 250, program: 'Clean Rivers Initiative', date: '2026-10-14', status: 'Completed', receiptNo: 'REC-2026-071' }
+];
+
+const INITIAL_USERS = [
+  { id: 'usr-admin', name: 'Dr. Rajesh Verma', email: 'admin@ujjwal.org', role: 'admin', phone: '+91 98765 43210' },
+  { id: 'usr-donor', name: 'Sarah Jenkins', email: 'donor@gmail.com', role: 'donor', phone: '+1 555 019 2831' },
+  { id: 'usr-vol', name: 'Aarav Patel', email: 'volunteer@gmail.com', role: 'volunteer', phone: '+91 91234 56789' }
+];
+
+// Main App Component
+export default function App() {
+  // Navigation & Route State
+  // Route options: 'home', 'login', 'register', 'dashboard', 'admin'
+  const [currentRoute, setCurrentRoute] = useState('home');
+  const [activeTab, setActiveTab] = useState('overview'); // Dashboard sub-tab
+
+  // Application Data States
+  const [currentUser, setCurrentUser] = useState(null); // null if guest
+  const [projects, setProjects] = useState(INITIAL_PROJECTS);
+  const [events, setEvents] = useState(INITIAL_EVENTS);
+  const [donations, setDonations] = useState(INITIAL_DONATIONS);
+  const [usersList, setUsersList] = useState(INITIAL_USERS);
+  
+  // UI States
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [donateModalOpen, setDonateModalOpen] = useState(false);
+  const [selectedDonateProject, setSelectedDonateProject] = useState(null);
+  const [activeNotification, setActiveNotification] = useState(null);
+  const [galleryFilter, setGalleryFilter] = useState('All');
+  const [lightboxImage, setLightboxImage] = useState(null);
+  const [selectedEventModal, setSelectedEventModal] = useState(null);
+
+  // Auto-scroll to top on route change
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentRoute]);
+
+  // Helper notification popups
+  const notify = (message, type = 'success') => {
+    setActiveNotification({ message, type });
+    setTimeout(() => setActiveNotification(null), 4000);
+  };
+
+  // Route Guard helper
+  const navigateTo = (route) => {
+    if ((route === 'dashboard' || route === 'admin') && !currentUser) {
+      notify('Please log in to access your dashboard.', 'error');
+      setCurrentRoute('login');
+      return;
+    }
+    if (route === 'admin' && currentUser?.role !== 'admin') {
+      notify('Unauthorized: Admin access required.', 'error');
+      setCurrentRoute('dashboard');
+      return;
+    }
+    setCurrentRoute(route);
+    setMobileMenuOpen(false);
+  };
+
+  // Auth Handlers
+  const handleLogout = () => {
+    setCurrentUser(null);
+    notify('Successfully logged out.');
+    setCurrentRoute('home');
+  };
+
+  return (
+    <div className="min-h-screen bg-[#FFFDF8] text-[#172C3D] font-sans antialiased flex flex-col selection:bg-[#DFF7E9] selection:text-[#075B46]">
+      {/* Global Notification Toast */}
+      {activeNotification && (
+        <div className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-2xl border text-sm font-medium transition-all transform animate-bounce ${
+          activeNotification.type === 'error' 
+            ? 'bg-red-600 text-white border-red-700' 
+            : 'bg-[#075B46] text-white border-[#138A63]'
+        }`}>
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <span>{activeNotification.message}</span>
+        </div>
+      )}
+
+      {/* Main Header / Navigation */}
+      <Navbar 
+        currentUser={currentUser} 
+        currentRoute={currentRoute} 
+        navigateTo={navigateTo}
+        handleLogout={handleLogout}
+        mobileMenuOpen={mobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
+        openDonateModal={() => {
+          setSelectedDonateProject(null);
+          setDonateModalOpen(true);
+        }}
+      />
+
+      {/* Main Content Area based on Current Route */}
+      <main className="flex-grow">
+        {currentRoute === 'home' && (
+          <HomePage 
+            navigateTo={navigateTo}
+            projects={projects}
+            events={events}
+            galleryFilter={galleryFilter}
+            setGalleryFilter={setGalleryFilter}
+            setLightboxImage={setLightboxImage}
+            openDonateModal={(proj) => {
+              setSelectedDonateProject(proj);
+              setDonateModalOpen(true);
+            }}
+            setSelectedEventModal={setSelectedEventModal}
+          />
+        )}
+
+        {currentRoute === 'login' && (
+          <LoginPage 
+            setCurrentUser={setCurrentUser}
+            navigateTo={navigateTo}
+            notify={notify}
+          />
+        )}
+
+        {currentRoute === 'register' && (
+          <RegisterPage 
+            usersList={usersList}
+            setUsersList={setUsersList}
+            setCurrentUser={setCurrentUser}
+            navigateTo={navigateTo}
+            notify={notify}
+          />
+        )}
+
+        {currentRoute === 'dashboard' && currentUser && (
+          <UserDashboard 
+            currentUser={currentUser}
+            setCurrentUser={setCurrentUser}
+            donations={donations.filter(d => d.donorName === currentUser.name || currentUser.role === 'admin')}
+            events={events}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            openDonateModal={() => {
+              setSelectedDonateProject(null);
+              setDonateModalOpen(true);
+            }}
+            notify={notify}
+          />
+        )}
+
+        {currentRoute === 'admin' && currentUser?.role === 'admin' && (
+          <AdminDashboard 
+            usersList={usersList}
+            setUsersList={setUsersList}
+            donations={donations}
+            projects={projects}
+            setProjects={setProjects}
+            events={events}
+            setEvents={setEvents}
+            notify={notify}
+          />
+        )}
+      </main>
+
+      {/* Global Modals */}
+      {donateModalOpen && (
+        <DonateModal 
+          project={selectedDonateProject} 
+          closeModal={() => setDonateModalOpen(false)}
+          onSuccess={(donationData) => {
+            setDonations([donationData, ...donations]);
+            notify(`Thank you! Demo donation of $${donationData.amount} recorded.`);
+            setDonateModalOpen(false);
+          }}
+        />
+      )}
+
+      {selectedEventModal && (
+        <EventDetailModal 
+          event={selectedEventModal} 
+          closeModal={() => setSelectedEventModal(null)}
+          currentUser={currentUser}
+          navigateTo={navigateTo}
+          notify={notify}
+        />
+      )}
+
+      {lightboxImage && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setLightboxImage(null)}>
+          <div className="relative max-w-4xl w-full">
+            <button 
+              onClick={() => setLightboxImage(null)}
+              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition"
+            >
+              <X className="w-8 h-8" />
+            </button>
+            <img src={lightboxImage.url} alt={lightboxImage.title} className="w-full h-auto max-h-[80vh] object-contain rounded-lg" />
+            <div className="mt-4 text-center text-white">
+              <h3 className="text-xl font-bold">{lightboxImage.title}</h3>
+              <span className="text-sm text-emerald-400">{lightboxImage.category}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Global Footer */}
+      <Footer navigateTo={navigateTo} />
+    </div>
+  );
+}
+
+// ==========================================
+// NAVIGATION COMPONENT
+// ==========================================
+function Navbar({ currentUser, currentRoute, navigateTo, handleLogout, mobileMenuOpen, setMobileMenuOpen, openDonateModal }) {
+  return (
+    <header className="sticky top-0 z-40 bg-[#FFFDF8]/95 backdrop-blur-md border-b border-emerald-900/10 transition-all">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20">
+          
+          {/* Logo & Org Name */}
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigateTo('home')}>
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#138A63] to-[#075B46] flex items-center justify-center shadow-md shadow-emerald-900/20 text-white">
+              <div className="relative">
+                <Heart className="w-6 h-6 fill-current text-emerald-200" />
+                <Leaf className="w-3.5 h-3.5 text-white absolute -top-1 -right-1" />
+              </div>
+            </div>
+            <div>
+              <span className="text-xl font-extrabold tracking-tight text-[#172C3D] block leading-none">
+                Ujjwal <span className="text-[#138A63]">Foundation</span>
+              </span>
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-emerald-700 block mt-1">
+                Empowering Lives Daily
+              </span>
+            </div>
+          </div>
+
+          {/* Desktop Center Menu Links */}
+          <nav className="hidden md:flex items-center space-x-1 lg:space-x-4">
+            <button onClick={() => navigateTo('home')} className={`px-3 py-2 text-sm font-semibold rounded-lg transition ${currentRoute === 'home' ? 'text-[#138A63] bg-[#DFF7E9]/50' : 'text-gray-600 hover:text-[#138A63]'}`}>
+              Home
+            </button>
+            <a href="#about" onClick={() => currentRoute !== 'home' && navigateTo('home')} className="px-3 py-2 text-sm font-semibold text-gray-600 hover:text-[#138A63] rounded-lg transition">
+              About Us
+            </a>
+            <a href="#programs" onClick={() => currentRoute !== 'home' && navigateTo('home')} className="px-3 py-2 text-sm font-semibold text-gray-600 hover:text-[#138A63] rounded-lg transition">
+              Programs
+            </a>
+            <a href="#projects" onClick={() => currentRoute !== 'home' && navigateTo('home')} className="px-3 py-2 text-sm font-semibold text-gray-600 hover:text-[#138A63] rounded-lg transition">
+              Projects
+            </a>
+            <a href="#gallery" onClick={() => currentRoute !== 'home' && navigateTo('home')} className="px-3 py-2 text-sm font-semibold text-gray-600 hover:text-[#138A63] rounded-lg transition">
+              Gallery
+            </a>
+            <a href="#events" onClick={() => currentRoute !== 'home' && navigateTo('home')} className="px-3 py-2 text-sm font-semibold text-gray-600 hover:text-[#138A63] rounded-lg transition">
+              Events
+            </a>
+          </nav>
+
+          {/* Desktop Upper Right Actions */}
+          <div className="hidden md:flex items-center space-x-3">
+            {!currentUser ? (
+              <>
+                <button 
+                  onClick={() => navigateTo('login')}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-[#075B46] border border-[#138A63]/30 rounded-xl hover:bg-[#DFF7E9] hover:border-[#138A63] transition shadow-xs"
+                >
+                  <LogIn className="w-4 h-4" /> Log In
+                </button>
+                <button 
+                  onClick={() => navigateTo('register')}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-white bg-[#138A63] rounded-xl hover:bg-[#075B46] transition shadow-md shadow-emerald-900/10"
+                >
+                  <UserPlus className="w-4 h-4" /> Register
+                </button>
+              </>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => navigateTo('dashboard')}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-white bg-[#075B46] rounded-xl hover:bg-[#138A63] transition shadow-md"
+                >
+                  <LayoutDashboard className="w-4 h-4" /> Dashboard
+                </button>
+                {currentUser.role === 'admin' && (
+                  <button 
+                    onClick={() => navigateTo('admin')}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-amber-800 bg-amber-100 border border-amber-300 rounded-xl hover:bg-amber-200 transition"
+                  >
+                    Admin Portal
+                  </button>
+                )}
+                <button 
+                  onClick={handleLogout}
+                  title="Logout"
+                  className="p-2 text-gray-500 hover:text-red-600 rounded-xl hover:bg-red-50 transition"
+                >
+                  <LogOut className="w-5 h-5" />
+                </button>
+              </div>
+            )}
+            <button 
+              onClick={openDonateModal}
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-white bg-gradient-to-r from-coral to-[#FF876F] hover:opacity-90 rounded-xl shadow-md transition transform hover:-translate-y-0.5"
+            >
+              <Heart className="w-4 h-4 fill-current" /> Donate Now
+            </button>
+          </div>
+
+          {/* Mobile Menu Toggle */}
+          <div className="flex md:hidden items-center gap-2">
+            <button 
+              onClick={openDonateModal}
+              className="px-3 py-1.5 text-xs font-bold text-white bg-[#FF876F] rounded-lg shadow-xs"
+            >
+              Donate
+            </button>
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
+              className="p-2 text-gray-700 hover:text-[#138A63] rounded-lg"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-b border-gray-200 bg-[#FFFDF8] px-4 pt-2 pb-6 space-y-3">
+          <button onClick={() => navigateTo('home')} className="block w-full text-left px-3 py-2 font-semibold text-gray-700 hover:bg-[#DFF7E9] rounded-lg">Home</button>
+          <a href="#about" onClick={() => setMobileMenuOpen(false)} className="block w-full text-left px-3 py-2 font-semibold text-gray-700 hover:bg-[#DFF7E9] rounded-lg">About Us</a>
+          <a href="#programs" onClick={() => setMobileMenuOpen(false)} className="block w-full text-left px-3 py-2 font-semibold text-gray-700 hover:bg-[#DFF7E9] rounded-lg">Programs</a>
+          <a href="#projects" onClick={() => setMobileMenuOpen(false)} className="block w-full text-left px-3 py-2 font-semibold text-gray-700 hover:bg-[#DFF7E9] rounded-lg">Projects</a>
+          <a href="#gallery" onClick={() => setMobileMenuOpen(false)} className="block w-full text-left px-3 py-2 font-semibold text-gray-700 hover:bg-[#DFF7E9] rounded-lg">Gallery</a>
+          <a href="#events" onClick={() => setMobileMenuOpen(false)} className="block w-full text-left px-3 py-2 font-semibold text-gray-700 hover:bg-[#DFF7E9] rounded-lg">Events</a>
+          
+          <div className="pt-4 border-t border-gray-100 flex flex-col gap-2">
+            {!currentUser ? (
+              <>
+                <button onClick={() => navigateTo('login')} className="w-full py-2.5 font-bold text-[#075B46] border border-[#138A63] rounded-xl text-center">Log In</button>
+                <button onClick={() => navigateTo('register')} className="w-full py-2.5 font-bold text-white bg-[#138A63] rounded-xl text-center">Register</button>
+              </>
+            ) : (
+              <>
+                <button onClick={() => navigateTo('dashboard')} className="w-full py-2.5 font-bold text-white bg-[#075B46] rounded-xl text-center">My Dashboard</button>
+                {currentUser.role === 'admin' && (
+                  <button onClick={() => navigateTo('admin')} className="w-full py-2.5 font-bold text-amber-900 bg-amber-100 rounded-xl text-center">Admin Console</button>
+                )}
+                <button onClick={handleLogout} className="w-full py-2 font-semibold text-red-600 text-center">Logout</button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </header>
+  );
+}
+
+// ==========================================
+// 1. PUBLIC HOMEPAGE (LANDING)
+// ==========================================
+function HomePage({ navigateTo, projects, events, galleryFilter, setGalleryFilter, setLightboxImage, openDonateModal, setSelectedEventModal }) {
+  return (
+    <div className="space-y-20 pb-16">
+      
+      {/* B. HERO SECTION */}
+      <section className="relative overflow-hidden pt-8 pb-16 lg:py-24 bg-gradient-to-b from-[#DFF7E9]/40 via-[#FFFDF8] to-[#FFFDF8]">
+        {/* Soft Decorative Orbs */}
+        <div className="absolute top-10 left-10 w-72 h-72 bg-[#138A63]/10 rounded-full blur-3xl -z-10 pointer-events-none" />
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-amber-200/20 rounded-full blur-3xl -z-10 pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            
+            {/* Left Content Column */}
+            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#DFF7E9] border border-[#138A63]/30 text-[#075B46] text-xs font-bold uppercase tracking-wider">
+                <Sparkles className="w-3.5 h-3.5" /> Non-Profit Organization
+              </div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#172C3D] leading-tight tracking-tight">
+                Together, We Can Make a <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#138A63] to-[#075B46]">Real Difference.</span>
+              </h1>
+              <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto lg:mx-0 font-normal leading-relaxed">
+                Empowering underserved communities through inclusive education, vital healthcare services, environmental preservation, and sustainable social initiatives.
+              </p>
+              
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                <a 
+                  href="#programs" 
+                  className="w-full sm:w-auto px-8 py-4 bg-[#138A63] hover:bg-[#075B46] text-white font-bold rounded-2xl shadow-lg shadow-emerald-900/20 hover:shadow-xl transition transform hover:-translate-y-0.5 text-center flex items-center justify-center gap-2"
+                >
+                  Explore Our Work <ArrowRight className="w-5 h-5" />
+                </a>
+                <button 
+                  onClick={() => navigateTo('register')}
+                  className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-gray-50 text-[#075B46] font-bold rounded-2xl border-2 border-[#138A63]/30 hover:border-[#138A63] transition text-center shadow-xs"
+                >
+                  Become a Volunteer
+                </button>
+              </div>
+
+              {/* Quick Trust Highlights */}
+              <div className="pt-6 border-t border-gray-200/60 flex items-center justify-center lg:justify-start gap-8 text-xs font-semibold text-gray-500">
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-[#138A63]" /> 100% Tax Exempt (80G)
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-[#138A63]" /> Verified NGO Status
+                </div>
+              </div>
+            </div>
+
+            {/* Right Media Column with Floating Cards */}
+            <div className="lg:col-span-5 relative">
+              <div className="relative mx-auto max-w-md lg:max-w-none">
+                {/* Main Hero Photo */}
+                <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
+                  <img 
+                    src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&q=80&w=1000" 
+                    alt="Volunteers helping children" 
+                    className="w-full h-[440px] object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <div className="absolute bottom-6 left-6 right-6 text-white">
+                    <p className="text-xs font-semibold text-emerald-300 uppercase">Featured Mission</p>
+                    <h3 className="text-lg font-bold">Childhood Education & Nutrition Drive</h3>
+                  </div>
+                </div>
+
+                {/* Floating Impact Card 1 */}
+                <div className="absolute -bottom-6 -left-6 z-20 bg-white p-4 rounded-2xl shadow-xl border border-gray-100 hidden sm:flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-[#DFF7E9] text-[#138A63] flex items-center justify-center font-bold text-xl">
+                    ❤️
+                  </div>
+                  <div>
+                    <div className="text-lg font-bold text-[#172C3D]">50,000+</div>
+                    <div className="text-xs text-gray-500 font-medium">Lives Impacted</div>
+                  </div>
+                </div>
+
+                {/* Floating Impact Card 2 */}
+                <div className="absolute top-8 -right-6 z-20 bg-[#075B46] text-white p-4 rounded-2xl shadow-xl hidden sm:flex items-center gap-3">
+                  <Award className="w-8 h-8 text-amber-300" />
+                  <div>
+                    <div className="text-xs text-emerald-200 uppercase font-bold">Transparency</div>
+                    <div className="text-sm font-bold">Platinum Rated</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* C. IMPACT STATISTICS */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-[#172C3D] rounded-3xl p-8 sm:p-12 shadow-2xl text-white relative overflow-hidden">
+          <div className="absolute right-0 top-0 opacity-10 pointer-events-none">
+            <Heart className="w-96 h-96 -mr-20 -mt-20 text-white" />
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center relative z-10">
+            <div className="space-y-2">
+              <div className="text-3xl sm:text-5xl font-extrabold text-[#8BCFF0]">65,000+</div>
+              <div className="text-sm text-gray-300 font-medium">People Reached</div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-3xl sm:text-5xl font-extrabold text-[#DFF7E9]">140+</div>
+              <div className="text-sm text-gray-300 font-medium">Community Projects</div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-3xl sm:text-5xl font-extrabold text-[#8BCFF0]">1,200+</div>
+              <div className="text-sm text-gray-300 font-medium">Active Volunteers</div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-3xl sm:text-5xl font-extrabold text-coral">85+</div>
+              <div className="text-sm text-gray-300 font-medium">Villages Supported</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* D. ABOUT THE FOUNDATION */}
+      <section id="about" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-24">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="lg:col-span-6 relative">
+            <div className="relative rounded-3xl overflow-hidden shadow-xl border-4 border-white">
+              <img 
+                src="https://images.unsplash.com/photo-1532629345422-7515f3d16bb0?auto=format&fit=crop&q=80&w=800" 
+                alt="Community meeting" 
+                className="w-full h-[400px] object-cover"
+              />
+            </div>
+            <div className="absolute -bottom-6 -right-6 bg-[#DFF7E9] text-[#075B46] p-6 rounded-2xl border border-[#138A63]/30 hidden md:block max-w-xs shadow-lg">
+              <p className="text-xs font-bold uppercase tracking-wider mb-1">Our Commitment</p>
+              <p className="text-sm font-semibold italic">"Empowering rural youth with self-sustaining tools for a brighter tomorrow."</p>
+            </div>
+          </div>
+
+          <div className="lg:col-span-6 space-y-6">
+            <div className="inline-block px-3 py-1 rounded-full bg-[#DFF7E9] text-[#075B46] text-xs font-bold uppercase tracking-wider">
+              About Ujjwal Foundation
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#172C3D]">
+              Dedicated to Building an Inclusive & Sustainable Future
+            </h2>
+            <p className="text-gray-600 leading-relaxed">
+              Founded in 2018, Ujjwal Foundation operates with a holistic approach to grassroots development. We bridge the structural gap by organizing medical outreach, constructing solar-powered digital schools, and conducting environmental restoration programs.
+            </p>
+
+            <div className="space-y-4 pt-2">
+              <div className="flex items-start gap-4 p-4 rounded-2xl bg-white border border-gray-100 shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-[#138A63]/10 text-[#138A63] flex items-center justify-center flex-shrink-0 font-bold">
+                  01
+                </div>
+                <div>
+                  <h4 className="font-bold text-[#172C3D]">Our Mission</h4>
+                  <p className="text-sm text-gray-600">To enable equal opportunities for underprivileged populations through education, health support, and eco-initiatives.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4 p-4 rounded-2xl bg-white border border-gray-100 shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-[#138A63]/10 text-[#138A63] flex items-center justify-center flex-shrink-0 font-bold">
+                  02
+                </div>
+                <div>
+                  <h4 className="font-bold text-[#172C3D]">Our Vision</h4>
+                  <p className="text-sm text-gray-600">A compassionate world where every individual possesses the tools, health, and environment to thrive with dignity.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* E. OUR PROGRAMS */}
+      <section id="programs" className="bg-[#DFF7E9]/30 py-16 scroll-mt-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#138A63]">Key Focus Areas</span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#172C3D]">Our Core Impact Programs</h2>
+            <p className="text-gray-600 text-sm sm:text-base">We drive targeted, measurable social programs designed to uplift communities end-to-end.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {INITIAL_PROGRAMS.map((prog) => {
+              const IconComp = prog.icon;
+              return (
+                <div key={prog.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 transition duration-300 flex flex-col group">
+                  <div className="relative h-48 overflow-hidden">
+                    <img src={prog.image} alt={prog.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                    <span className="absolute top-3 right-3 px-3 py-1 bg-white/90 backdrop-blur-md text-[#075B46] text-xs font-bold rounded-full">
+                      {prog.category}
+                    </span>
+                  </div>
+                  <div className="p-6 flex-grow flex flex-col justify-between space-y-4">
+                    <div>
+                      <div className="w-10 h-10 rounded-xl bg-[#DFF7E9] text-[#138A63] flex items-center justify-center mb-3">
+                        <IconComp className="w-5 h-5" />
+                      </div>
+                      <h3 className="text-xl font-bold text-[#172C3D] group-hover:text-[#138A63] transition">{prog.title}</h3>
+                      <p className="text-xs text-gray-600 mt-2 leading-relaxed">{prog.description}</p>
+                    </div>
+                    <div className="pt-4 border-t border-gray-100 flex items-center justify-between text-xs font-semibold text-gray-500">
+                      <span>Reach: {prog.beneficiaries}</span>
+                      <button onClick={openDonateModal} className="text-[#138A63] font-bold group-hover:translate-x-1 transition flex items-center gap-1">
+                        Support <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* F. FEATURED PROJECTS */}
+      <section id="projects" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 scroll-mt-24">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-widest text-[#138A63]">Ongoing Initiatives</span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#172C3D]">Featured Active Projects</h2>
+          </div>
+          <p className="text-gray-600 text-sm max-w-md">Transparent reporting on active campaigns where your direct contributions create tangible real-world outcomes.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {projects.map((proj) => {
+            const percent = Math.min(100, Math.round((proj.raised / proj.goal) * 100));
+            return (
+              <div key={proj.id} className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-md hover:shadow-xl transition flex flex-col">
+                <div className="relative h-52">
+                  <img src={proj.image} alt={proj.title} className="w-full h-full object-cover" />
+                  <span className="absolute top-3 left-3 bg-[#172C3D]/80 backdrop-blur-md text-white text-xs px-3 py-1 rounded-full font-semibold">
+                    📍 {proj.location}
+                  </span>
+                </div>
+                <div className="p-6 flex-grow flex flex-col justify-between space-y-4">
+                  <div>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md">
+                      {proj.status}
+                    </span>
+                    <h3 className="text-xl font-bold text-[#172C3D] mt-2">{proj.title}</h3>
+                    <p className="text-xs text-gray-600 mt-2 line-clamp-2">{proj.description}</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs font-bold">
+                      <span className="text-gray-500">Raised: ${proj.raised.toLocaleString()}</span>
+                      <span className="text-[#138A63]">Goal: ${proj.goal.toLocaleString()}</span>
+                    </div>
+                    {/* Progress Bar */}
+                    <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-[#138A63] to-[#075B46] transition-all duration-500" style={{ width: `${percent}%` }} />
+                    </div>
+                    <div className="text-right text-[11px] font-semibold text-gray-400">{percent}% Funded</div>
+                  </div>
+
+                  <button 
+                    onClick={() => openDonateModal(proj)}
+                    className="w-full py-3 bg-[#DFF7E9] hover:bg-[#138A63] hover:text-white text-[#075B46] font-bold rounded-xl transition text-sm flex items-center justify-center gap-2"
+                  >
+                    <Heart className="w-4 h-4" /> Contribute to Project
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* G. GALLERY */}
+      <section id="gallery" className="bg-gray-50 py-16 scroll-mt-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          <div className="text-center space-y-3">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#138A63]">Visual Storytelling</span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#172C3D]">Impact Photo Gallery</h2>
+          </div>
+
+          {/* Filter Pills */}
+          <div className="flex flex-wrap justify-center gap-2">
+            {['All', 'Education', 'Health', 'Environment', 'Livelihood'].map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setGalleryFilter(cat)}
+                className={`px-4 py-2 text-xs font-bold rounded-full transition ${
+                  galleryFilter === cat
+                    ? 'bg-[#075B46] text-white shadow-md'
+                    : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-100'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Gallery Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {INITIAL_GALLERY
+              .filter(item => galleryFilter === 'All' || item.category === galleryFilter)
+              .map(item => (
+                <div 
+                  key={item.id} 
+                  onClick={() => setLightboxImage(item)}
+                  className="group relative h-64 rounded-2xl overflow-hidden shadow-sm cursor-pointer border border-gray-100"
+                >
+                  <img src={item.url} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex items-end p-6 text-white">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-emerald-400">{item.category}</span>
+                      <h4 className="text-base font-bold">{item.title}</h4>
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      </section>
+
+      {/* H. UPCOMING EVENTS */}
+      <section id="events" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 scroll-mt-24">
+        <div className="text-center max-w-2xl mx-auto space-y-3">
+          <span className="text-xs font-bold uppercase tracking-widest text-[#138A63]">Get Involved</span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#172C3D]">Upcoming Volunteer Events</h2>
+          <p className="text-gray-600 text-sm">Join our ground volunteers and leaders in upcoming community welfare activities.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {events.map((ev) => (
+            <div key={ev.id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-md hover:shadow-xl transition flex flex-col justify-between space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="px-3 py-1 bg-[#DFF7E9] text-[#075B46] text-xs font-bold rounded-lg">
+                    {ev.category}
+                  </span>
+                  <span className="text-xs text-gray-500 font-semibold flex items-center gap-1">
+                    <Users className="w-3.5 h-3.5" /> {ev.registeredCount} Attending
+                  </span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-[#172C3D]">{ev.title}</h3>
+                  <p className="text-xs text-gray-600 mt-2 line-clamp-2">{ev.description}</p>
+                </div>
+              </div>
+
+              <div className="space-y-4 border-t border-gray-100 pt-4">
+                <div className="text-xs text-gray-600 space-y-1 font-medium">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-[#138A63]" /> {ev.date} ({ev.time})
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-[#138A63]" /> {ev.location}
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setSelectedEventModal(ev)}
+                  className="w-full py-2.5 bg-[#138A63] hover:bg-[#075B46] text-white text-xs font-bold rounded-xl transition"
+                >
+                  Register for Event
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* I. CALL TO ACTION */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-gradient-to-r from-[#075B46] via-[#138A63] to-[#075B46] rounded-3xl p-10 sm:p-16 text-center text-white shadow-2xl space-y-6 relative overflow-hidden">
+          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight max-w-2xl mx-auto">
+            Be Part of Something Bigger Than Yourself.
+          </h2>
+          <p className="text-emerald-100 max-w-xl mx-auto text-sm sm:text-base">
+            Whether through a small monthly donation or giving your time on weekends, your involvement transforms lives.
+          </p>
+          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button 
+              onClick={() => navigateTo('register')}
+              className="w-full sm:w-auto px-8 py-4 bg-white text-[#075B46] hover:bg-emerald-50 font-bold rounded-2xl shadow-md transition"
+            >
+              Join as a Volunteer
+            </button>
+            <button 
+              onClick={() => openDonateModal(null)}
+              className="w-full sm:w-auto px-8 py-4 bg-[#FF876F] hover:bg-[#FF876F]/90 text-white font-bold rounded-2xl shadow-md transition"
+            >
+              Support Our Mission
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  );
+}
+
+// ==========================================
+// 2. AUTHENTICATION PAGES (/login & /register)
+// ==========================================
+
+function LoginPage({ setCurrentUser, navigateTo, notify }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    setTimeout(() => {
+      setLoading(false);
+      // Hardcoded login rules
+      if (email.toLowerCase() === 'admin@ujjwal.org' && password === 'admin123') {
+        const adminUser = { id: 'usr-admin', name: 'Dr. Rajesh Verma', email: 'admin@ujjwal.org', role: 'admin', phone: '+91 98765 43210' };
+        setCurrentUser(adminUser);
+        notify('Welcome back, Administrator!');
+        navigateTo('admin');
+      } else if (email.toLowerCase() === 'donor@gmail.com' && password === 'donor123') {
+        const donorUser = { id: 'usr-donor', name: 'Sarah Jenkins', email: 'donor@gmail.com', role: 'donor', phone: '+1 555 019 2831' };
+        setCurrentUser(donorUser);
+        notify('Welcome back, Sarah!');
+        navigateTo('dashboard');
+      } else if (email.toLowerCase() === 'volunteer@gmail.com' && password === 'vol123') {
+        const volUser = { id: 'usr-vol', name: 'Aarav Patel', email: 'volunteer@gmail.com', role: 'volunteer', phone: '+91 91234 56789' };
+        setCurrentUser(volUser);
+        notify('Welcome back, Aarav!');
+        navigateTo('dashboard');
+      } else {
+        notify('Invalid credentials. Try demo logins below!', 'error');
+      }
+    }, 600);
+  };
+
+  // Quick helper to autofill demo credentials
+  const fillDemo = (demoType) => {
+    if (demoType === 'admin') {
+      setEmail('admin@ujjwal.org');
+      setPassword('admin123');
+    } else if (demoType === 'donor') {
+      setEmail('donor@gmail.com');
+      setPassword('donor123');
+    } else {
+      setEmail('volunteer@gmail.com');
+      setPassword('vol123');
+    }
+  };
+
+  return (
+    <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-[#DFF7E9]/20">
+      <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-12 border border-gray-100">
+        
+        {/* Left Visual Banner */}
+        <div className="md:col-span-5 bg-[#075B46] p-8 text-white flex flex-col justify-between relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#138A63]/30 rounded-full blur-2xl -z-0" />
+          <div className="relative z-10 space-y-4">
+            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+              <Heart className="w-6 h-6 text-emerald-300" />
+            </div>
+            <h3 className="text-2xl font-bold">Welcome Back to Ujjwal Foundation</h3>
+            <p className="text-xs text-emerald-100 leading-relaxed">
+              Log in to access your donation receipts, track project developments, or manage upcoming volunteer schedules.
+            </p>
+          </div>
+
+          <div className="relative z-10 pt-8 border-t border-emerald-800 text-xs text-emerald-200">
+            <p className="font-semibold mb-2">⚡ Quick Demo Login Presets:</p>
+            <div className="flex flex-wrap gap-2">
+              <button onClick={() => fillDemo('donor')} className="px-2.5 py-1 bg-white/10 hover:bg-white/20 rounded-lg">Donor</button>
+              <button onClick={() => fillDemo('volunteer')} className="px-2.5 py-1 bg-white/10 hover:bg-white/20 rounded-lg">Volunteer</button>
+              <button onClick={() => fillDemo('admin')} className="px-2.5 py-1 bg-amber-500/30 hover:bg-amber-500/40 rounded-lg text-amber-200">Admin</button>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Login Form */}
+        <div className="md:col-span-7 p-8 sm:p-12 space-y-6">
+          <div>
+            <h2 className="text-2xl font-extrabold text-[#172C3D]">Account Login</h2>
+            <p className="text-xs text-gray-500 mt-1">Enter your registered email and password</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Email Address</label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-3.5" />
+                <input 
+                  type="email" 
+                  required
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@example.com" 
+                  className="w-full pl-10 pr-4 py-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#138A63] focus:border-transparent outline-none transition"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Password</label>
+              <div className="relative">
+                <Key className="w-4 h-4 text-gray-400 absolute left-3 top-3.5" />
+                <input 
+                  type={showPassword ? 'text' : 'password'} 
+                  required
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••" 
+                  className="w-full pl-10 pr-10 py-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#138A63] focus:border-transparent outline-none transition"
+                />
+                <button 
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between text-xs">
+              <label className="flex items-center gap-2 cursor-pointer text-gray-600">
+                <input type="checkbox" className="rounded text-[#138A63] focus:ring-[#138A63]" /> Remember me
+              </label>
+              <a href="#" onClick={(e) => { e.preventDefault(); notify('Password reset link sent to your email.'); }} className="text-[#138A63] font-semibold hover:underline">
+                Forgot password?
+              </a>
+            </div>
+
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="w-full py-3.5 bg-[#138A63] hover:bg-[#075B46] text-white font-bold rounded-xl shadow-md transition flex items-center justify-center gap-2"
+            >
+              {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Log In to Account'}
+            </button>
+          </form>
+
+          <div className="text-center text-xs text-gray-500 pt-4 border-t border-gray-100">
+            Don't have an account yet?{' '}
+            <button onClick={() => navigateTo('register')} className="text-[#138A63] font-bold hover:underline">
+              Register here
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+function RegisterPage({ usersList, setUsersList, setCurrentUser, navigateTo, notify }) {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState('donor'); // 'donor' or 'volunteer'
+  const [agreed, setAgreed] = useState(false);
+
+  const handleRegister = (e) => {
+    e.preventDefault();
+    if (!agreed) {
+      notify('Please accept the Terms & Conditions.', 'error');
+      return;
+    }
+
+    const newUser = {
+      id: `usr-${Date.now()}`,
+      name,
+      email,
+      phone,
+      role
+    };
+
+    setUsersList([...usersList, newUser]);
+    setCurrentUser(newUser);
+    notify(`Account created successfully! Welcome ${name}.`);
+    navigateTo('dashboard');
+  };
+
+  return (
+    <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-[#DFF7E9]/20">
+      <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-12 border border-gray-100">
+        
+        {/* Left Visual Banner */}
+        <div className="md:col-span-5 bg-[#172C3D] p-8 text-white flex flex-col justify-between relative">
+          <div className="space-y-4">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+              <UserPlus className="w-6 h-6" />
+            </div>
+            <h3 className="text-2xl font-bold">Join the Movement</h3>
+            <p className="text-xs text-gray-300 leading-relaxed">
+              Register as a Community Donor or Active Volunteer to support high-impact projects around education and health.
+            </p>
+          </div>
+
+          <div className="space-y-3 pt-6 border-t border-gray-700 text-xs text-gray-300">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-[#138A63]" /> Instant tax donation receipts
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-[#138A63]" /> Volunteer activity certifications
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-[#138A63]" /> 100% transparent tracking
+            </div>
+          </div>
+        </div>
+
+        {/* Right Form */}
+        <div className="md:col-span-7 p-8 sm:p-10 space-y-6">
+          <div>
+            <h2 className="text-2xl font-extrabold text-[#172C3D]">Create Your Account</h2>
+            <p className="text-xs text-gray-500 mt-1">Select account type and complete your profile</p>
+          </div>
+
+          <form onSubmit={handleRegister} className="space-y-4">
+            {/* Account Type Selector */}
+            <div className="grid grid-cols-2 gap-3 p-1 bg-gray-100 rounded-xl">
+              <button
+                type="button"
+                onClick={() => setRole('donor')}
+                className={`py-2 text-xs font-bold rounded-lg transition ${role === 'donor' ? 'bg-[#138A63] text-white shadow-xs' : 'text-gray-600'}`}
+              >
+                ❤️ Donor Account
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole('volunteer')}
+                className={`py-2 text-xs font-bold rounded-lg transition ${role === 'volunteer' ? 'bg-[#138A63] text-white shadow-xs' : 'text-gray-600'}`}
+              >
+                🤝 Volunteer Account
+              </button>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Full Name</label>
+              <input 
+                type="text" 
+                required
+                value={name} 
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Jane Doe" 
+                className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#138A63] outline-none"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Email</label>
+                <input 
+                  type="email" 
+                  required
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="jane@example.com" 
+                  className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#138A63] outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Phone Number</label>
+                <input 
+                  type="tel" 
+                  value={phone} 
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+1 (555) 000-0000" 
+                  className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#138A63] outline-none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Create Password</label>
+              <input 
+                type="password" 
+                required
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Minimum 6 characters" 
+                className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#138A63] outline-none"
+              />
+            </div>
+
+            <label className="flex items-start gap-2 cursor-pointer text-xs text-gray-600 pt-1">
+              <input 
+                type="checkbox" 
+                checked={agreed} 
+                onChange={(e) => setAgreed(e.target.checked)}
+                className="mt-0.5 rounded text-[#138A63] focus:ring-[#138A63]" 
+              />
+              <span>I agree to the Terms of Service and Privacy Policy.</span>
+            </label>
+
+            <button 
+              type="submit" 
+              className="w-full py-3.5 bg-[#138A63] hover:bg-[#075B46] text-white font-bold rounded-xl shadow-md transition"
+            >
+              Complete Registration
+            </button>
+          </form>
+
+          <div className="text-center text-xs text-gray-500 pt-3 border-t border-gray-100">
+            Already have an account?{' '}
+            <button onClick={() => navigateTo('login')} className="text-[#138A63] font-bold hover:underline">
+              Log in
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// 3. AUTHENTICATED USER DASHBOARD (/dashboard)
+// ==========================================
+function UserDashboard({ currentUser, setCurrentUser, donations, events, activeTab, setActiveTab, openDonateModal, notify }) {
+  const isDonor = currentUser.role === 'donor';
+  const isVolunteer = currentUser.role === 'volunteer';
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      
+      {/* Dashboard Layout Container */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* Left Sidebar */}
+        <div className="lg:col-span-3 space-y-6">
+          {/* User Profile Summary Card */}
+          <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm text-center space-y-3">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-[#138A63] to-[#8BCFF0] mx-auto flex items-center justify-center text-white text-2xl font-extrabold shadow-md">
+              {currentUser.name.charAt(0)}
+            </div>
+            <div>
+              <h3 className="font-extrabold text-[#172C3D]">{currentUser.name}</h3>
+              <p className="text-xs text-gray-500">{currentUser.email}</p>
+              <span className="inline-block mt-2 px-3 py-1 bg-[#DFF7E9] text-[#075B46] text-[10px] font-bold uppercase tracking-wider rounded-full">
+                {currentUser.role} Account
+              </span>
+            </div>
+          </div>
+
+          {/* Navigation Items */}
+          <div className="bg-white rounded-3xl border border-gray-100 p-3 shadow-sm space-y-1">
+            <button 
+              onClick={() => setActiveTab('overview')}
+              className={`w-full flex items-center gap-3 px-4 py-3 text-xs font-bold rounded-2xl transition ${activeTab === 'overview' ? 'bg-[#075B46] text-white shadow-xs' : 'text-gray-600 hover:bg-gray-50'}`}
+            >
+              <LayoutDashboard className="w-4 h-4" /> Overview
+            </button>
+            {isDonor && (
+              <button 
+                onClick={() => setActiveTab('donations')}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-xs font-bold rounded-2xl transition ${activeTab === 'donations' ? 'bg-[#075B46] text-white shadow-xs' : 'text-gray-600 hover:bg-gray-50'}`}
+              >
+                <DollarSign className="w-4 h-4" /> My Donations
+              </button>
+            )}
+            {isVolunteer && (
+              <button 
+                onClick={() => setActiveTab('volunteer')}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-xs font-bold rounded-2xl transition ${activeTab === 'volunteer' ? 'bg-[#075B46] text-white shadow-xs' : 'text-gray-600 hover:bg-gray-50'}`}
+              >
+                <Briefcase className="w-4 h-4" /> My Assignments
+              </button>
+            )}
+            <button 
+              onClick={() => setActiveTab('events')}
+              className={`w-full flex items-center gap-3 px-4 py-3 text-xs font-bold rounded-2xl transition ${activeTab === 'events' ? 'bg-[#075B46] text-white shadow-xs' : 'text-gray-600 hover:bg-gray-50'}`}
+            >
+              <Calendar className="w-4 h-4" /> My Events
+            </button>
+            <button 
+              onClick={() => setActiveTab('settings')}
+              className={`w-full flex items-center gap-3 px-4 py-3 text-xs font-bold rounded-2xl transition ${activeTab === 'settings' ? 'bg-[#075B46] text-white shadow-xs' : 'text-gray-600 hover:bg-gray-50'}`}
+            >
+              <Settings className="w-4 h-4" /> Profile Settings
+            </button>
+          </div>
+        </div>
+
+        {/* Main Dashboard Area */}
+        <div className="lg:col-span-9 space-y-8">
+          
+          {/* A. WELCOME BAR */}
+          <div className="bg-gradient-to-r from-[#172C3D] to-[#075B46] rounded-3xl p-8 text-white shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <span className="text-xs text-emerald-300 font-bold uppercase tracking-wider">Dashboard Portal</span>
+              <h1 className="text-2xl sm:text-3xl font-extrabold mt-1">Welcome back, {currentUser.name}!</h1>
+              <p className="text-xs text-gray-200 mt-1">Here is a quick overview of your social contributions and foundation activities.</p>
+            </div>
+            {isDonor && (
+              <button 
+                onClick={openDonateModal} 
+                className="px-5 py-3 bg-gradient-to-r from-coral to-[#FF876F] font-bold text-xs rounded-2xl shadow-md hover:opacity-90 transition whitespace-nowrap"
+              >
+                + Make New Donation
+              </button>
+            )}
+          </div>
+
+          {/* OVERVIEW TAB CONTENT */}
+          {activeTab === 'overview' && (
+            <div className="space-y-8">
+              
+              {/* B. SUMMARY STAT CARDS */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                {isDonor ? (
+                  <>
+                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-2">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-100 text-[#138A63] flex items-center justify-center font-bold">
+                        <DollarSign className="w-5 h-5" />
+                      </div>
+                      <div className="text-2xl font-extrabold text-[#172C3D]">
+                        ${donations.reduce((acc, curr) => acc + curr.amount, 0).toLocaleString()}
+                      </div>
+                      <div className="text-xs text-gray-500 font-medium">Total Contributed</div>
+                    </div>
+                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-2">
+                      <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+                        <Heart className="w-5 h-5" />
+                      </div>
+                      <div className="text-2xl font-extrabold text-[#172C3D]">{donations.length}</div>
+                      <div className="text-xs text-gray-500 font-medium">Donations Made</div>
+                    </div>
+                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-2">
+                      <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold">
+                        <Award className="w-5 h-5" />
+                      </div>
+                      <div className="text-2xl font-extrabold text-[#172C3D]">80G Eligible</div>
+                      <div className="text-xs text-gray-500 font-medium">Tax Benefit Status</div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-2">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-100 text-[#138A63] flex items-center justify-center font-bold">
+                        <Briefcase className="w-5 h-5" />
+                      </div>
+                      <div className="text-2xl font-extrabold text-[#172C3D]">36 Hours</div>
+                      <div className="text-xs text-gray-500 font-medium">Completed Service</div>
+                    </div>
+                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-2">
+                      <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+                        <CheckCircle2 className="w-5 h-5" />
+                      </div>
+                      <div className="text-2xl font-extrabold text-[#172C3D]">4 Events</div>
+                      <div className="text-xs text-gray-500 font-medium">Activities Attended</div>
+                    </div>
+                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-2">
+                      <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold">
+                        <Award className="w-5 h-5" />
+                      </div>
+                      <div className="text-2xl font-extrabold text-[#172C3D]">Active Badge</div>
+                      <div className="text-xs text-gray-500 font-medium">Volunteer Tier</div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* RECENT RELEVANT ACTIVITIES */}
+              <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm space-y-4">
+                <h3 className="text-lg font-bold text-[#172C3D]">Recent Activity History</h3>
+                
+                {isDonor ? (
+                  donations.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs">
+                        <thead>
+                          <tr className="border-b border-gray-100 text-gray-400 uppercase font-bold">
+                            <th className="pb-3">Receipt ID</th>
+                            <th className="pb-3">Program</th>
+                            <th className="pb-3">Date</th>
+                            <th className="pb-3">Amount</th>
+                            <th className="pb-3 text-right">Receipt</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50">
+                          {donations.map((d) => (
+                            <tr key={d.id} className="hover:bg-gray-50/80">
+                              <td className="py-3 font-semibold text-[#172C3D]">{d.receiptNo}</td>
+                              <td className="py-3">{d.program}</td>
+                              <td className="py-3 text-gray-500">{d.date}</td>
+                              <td className="py-3 font-bold text-[#138A63]">${d.amount}</td>
+                              <td className="py-3 text-right">
+                                <button 
+                                  onClick={() => notify(`Downloading Tax Receipt PDF: ${d.receiptNo}`)}
+                                  className="p-1.5 text-gray-600 hover:text-[#138A63] rounded-lg hover:bg-emerald-50"
+                                >
+                                  <Download className="w-4 h-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-400 py-4">No recent donation records found.</p>
+                  )
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3.5 bg-gray-50 rounded-2xl border border-gray-100">
+                      <div>
+                        <div className="text-xs font-bold text-[#172C3D]">Tree Plantation Drive</div>
+                        <div className="text-[11px] text-gray-500">Served 6 Hours • Central Park</div>
+                      </div>
+                      <span className="px-2.5 py-1 bg-emerald-100 text-[#075B46] text-[10px] font-bold rounded-md">Verified</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3.5 bg-gray-50 rounded-2xl border border-gray-100">
+                      <div>
+                        <div className="text-xs font-bold text-[#172C3D]">Medical Camp Setup</div>
+                        <div className="text-[11px] text-gray-500">Served 4 Hours • East District</div>
+                      </div>
+                      <span className="px-2.5 py-1 bg-emerald-100 text-[#075B46] text-[10px] font-bold rounded-md">Verified</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+            </div>
+          )}
+
+          {/* DONATIONS TAB */}
+          {activeTab === 'donations' && (
+            <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-[#172C3D]">My Contribution History</h3>
+                  <p className="text-xs text-gray-500">Download official tax exemption receipts for your filings.</p>
+                </div>
+                <button 
+                  onClick={openDonateModal}
+                  className="px-4 py-2 bg-[#138A63] text-white text-xs font-bold rounded-xl"
+                >
+                  + New Donation
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-gray-100 text-gray-400 uppercase font-bold">
+                      <th className="pb-3">Receipt ID</th>
+                      <th className="pb-3">Program Name</th>
+                      <th className="pb-3">Date</th>
+                      <th className="pb-3">Status</th>
+                      <th className="pb-3">Amount</th>
+                      <th className="pb-3 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {donations.map((d) => (
+                      <tr key={d.id} className="hover:bg-gray-50">
+                        <td className="py-3 font-semibold text-[#172C3D]">{d.receiptNo}</td>
+                        <td className="py-3">{d.program}</td>
+                        <td className="py-3 text-gray-500">{d.date}</td>
+                        <td className="py-3">
+                          <span className="px-2 py-0.5 bg-emerald-100 text-[#075B46] text-[10px] font-bold rounded">
+                            {d.status}
+                          </span>
+                        </td>
+                        <td className="py-3 font-bold text-[#138A63]">${d.amount}</td>
+                        <td className="py-3 text-right">
+                          <button 
+                            onClick={() => notify(`Downloading Tax Exemption Certificate ${d.receiptNo}`)}
+                            className="inline-flex items-center gap-1 text-xs text-[#138A63] font-bold hover:underline"
+                          >
+                            <Download className="w-3.5 h-3.5" /> Receipt PDF
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* VOLUNTEER ASSIGNMENTS TAB */}
+          {activeTab === 'volunteer' && (
+            <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm space-y-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-bold text-[#172C3D]">Volunteer Dashboard & Certificates</h3>
+                  <p className="text-xs text-gray-500">Track your completed hours and download verified volunteering certificates.</p>
+                </div>
+                <button 
+                  onClick={() => notify('Downloading Official Volunteer Certificate PDF')}
+                  className="px-4 py-2 bg-amber-600 text-white text-xs font-bold rounded-xl flex items-center gap-1.5"
+                >
+                  <Award className="w-4 h-4" /> Download Certificate
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-2xl border border-emerald-100 bg-[#DFF7E9]/30 space-y-2">
+                  <div className="text-xs font-bold text-[#075B46]">Current Assignment</div>
+                  <div className="text-base font-bold text-[#172C3D]">Green Campus Plantation Lead</div>
+                  <div className="text-xs text-gray-600">Shift: Saturday, 09:00 AM • Central Park</div>
+                  <span className="inline-block px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-bold rounded">Confirmed</span>
+                </div>
+                
+                <div className="p-4 rounded-2xl border border-gray-100 space-y-2">
+                  <div className="text-xs font-bold text-gray-500">Pending Application</div>
+                  <div className="text-base font-bold text-[#172C3D]">Youth Digital Mentor</div>
+                  <div className="text-xs text-gray-600">Applied on: 2026-10-15</div>
+                  <span className="inline-block px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded">Under Review</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* EVENTS TAB */}
+          {activeTab === 'events' && (
+            <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm space-y-4">
+              <h3 className="text-lg font-bold text-[#172C3D]">Registered Community Events</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {events.slice(0, 2).map((ev) => (
+                  <div key={ev.id} className="p-4 rounded-2xl border border-gray-100 bg-gray-50 space-y-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#138A63]">{ev.category}</span>
+                    <h4 className="font-bold text-[#172C3D] text-sm">{ev.title}</h4>
+                    <p className="text-xs text-gray-500">{ev.date} • {ev.location}</p>
+                    <button onClick={() => notify('Event details sent to your registered phone & email.')} className="text-xs text-[#138A63] font-bold hover:underline block pt-2">
+                      View Event Pass →
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* SETTINGS TAB */}
+          {activeTab === 'settings' && (
+            <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm space-y-6">
+              <h3 className="text-lg font-bold text-[#172C3D]">Profile Information</h3>
+              
+              <div className="space-y-4 max-w-lg">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Full Name</label>
+                  <input 
+                    type="text" 
+                    value={currentUser.name}
+                    onChange={(e) => setCurrentUser({...currentUser, name: e.target.value})}
+                    className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#138A63] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Email Address</label>
+                  <input 
+                    type="email" 
+                    disabled 
+                    value={currentUser.email}
+                    className="w-full px-4 py-2.5 text-sm border border-gray-200 bg-gray-50 text-gray-500 rounded-xl outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Phone Number</label>
+                  <input 
+                    type="text" 
+                    value={currentUser.phone || ''}
+                    onChange={(e) => setCurrentUser({...currentUser, phone: e.target.value})}
+                    className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#138A63] outline-none"
+                  />
+                </div>
+                <button 
+                  onClick={() => notify('Profile updated successfully!')}
+                  className="px-6 py-2.5 bg-[#138A63] text-white font-bold text-xs rounded-xl shadow-md"
+                >
+                  Save Profile Changes
+                </button>
+              </div>
+            </div>
+          )}
+
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
+
+// ==========================================
+// 4. ADMIN DASHBOARD (/admin)
+// ==========================================
+function AdminDashboard({ usersList, setUsersList, donations, projects, setProjects, events, setEvents, notify }) {
+  const [adminTab, setAdminTab] = useState('overview');
+  const [newProjTitle, setNewProjTitle] = useState('');
+  const [newProjGoal, setNewProjGoal] = useState('');
+
+  const handleAddProject = (e) => {
+    e.preventDefault();
+    if (!newProjTitle || !newProjGoal) return;
+    const newProj = {
+      id: `proj-${Date.now()}`,
+      title: newProjTitle,
+      location: 'National Focus',
+      status: 'Ongoing',
+      raised: 0,
+      goal: Number(newProjGoal),
+      image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=800',
+      description: 'Newly added administrative impact program.'
+    };
+    setProjects([newProj, ...projects]);
+    setNewProjTitle('');
+    setNewProjGoal('');
+    notify('New NGO project published live!');
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      
+      {/* Admin Top Header */}
+      <div className="bg-amber-900 text-amber-50 rounded-3xl p-8 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+        <div>
+          <span className="px-3 py-1 bg-amber-800 text-amber-200 text-[10px] font-bold rounded-full uppercase tracking-wider">
+            Protected Admin Route
+          </span>
+          <h1 className="text-3xl font-extrabold mt-2">Executive Operations Console</h1>
+          <p className="text-xs text-amber-200 mt-1">Manage platform users, projects, funding streams, and event registrations.</p>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={() => setAdminTab('overview')} className={`px-4 py-2 text-xs font-bold rounded-xl transition ${adminTab === 'overview' ? 'bg-amber-100 text-amber-950' : 'bg-amber-800/60'}`}>Overview</button>
+          <button onClick={() => setAdminTab('users')} className={`px-4 py-2 text-xs font-bold rounded-xl transition ${adminTab === 'users' ? 'bg-amber-100 text-amber-950' : 'bg-amber-800/60'}`}>Users</button>
+          <button onClick={() => setAdminTab('projects')} className={`px-4 py-2 text-xs font-bold rounded-xl transition ${adminTab === 'projects' ? 'bg-amber-100 text-amber-950' : 'bg-amber-800/60'}`}>Projects</button>
+        </div>
+      </div>
+
+      {adminTab === 'overview' && (
+        <div className="space-y-8">
+          {/* Admin Stat Overview Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-6">
+            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+              <div className="text-xs text-gray-500 font-bold uppercase">Total Raised</div>
+              <div className="text-3xl font-extrabold text-[#138A63] mt-2">
+                ${donations.reduce((acc, curr) => acc + curr.amount, 0).toLocaleString()}
+              </div>
+            </div>
+            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+              <div className="text-xs text-gray-500 font-bold uppercase">Registered Users</div>
+              <div className="text-3xl font-extrabold text-[#172C3D] mt-2">{usersList.length}</div>
+            </div>
+            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+              <div className="text-xs text-gray-500 font-bold uppercase">Active Projects</div>
+              <div className="text-3xl font-extrabold text-blue-600 mt-2">{projects.length}</div>
+            </div>
+            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+              <div className="text-xs text-gray-500 font-bold uppercase">Events Hosted</div>
+              <div className="text-3xl font-extrabold text-purple-600 mt-2">{events.length}</div>
+            </div>
+          </div>
+
+          {/* Master Donation Ledger */}
+          <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-[#172C3D]">Master Donations Ledger</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-gray-100 text-gray-400 uppercase font-bold">
+                    <th className="pb-3">ID</th>
+                    <th className="pb-3">Donor Name</th>
+                    <th className="pb-3">Program</th>
+                    <th className="pb-3">Amount</th>
+                    <th className="pb-3">Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {donations.map((d) => (
+                    <tr key={d.id}>
+                      <td className="py-3 font-mono">{d.id}</td>
+                      <td className="py-3 font-semibold">{d.donorName}</td>
+                      <td className="py-3">{d.program}</td>
+                      <td className="py-3 font-bold text-[#138A63]">${d.amount}</td>
+                      <td className="py-3 text-gray-500">{d.date}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {adminTab === 'users' && (
+        <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm space-y-4">
+          <h3 className="text-lg font-bold text-[#172C3D]">User Accounts & Roles</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-gray-100 text-gray-400 uppercase font-bold">
+                  <th className="pb-3">User Name</th>
+                  <th className="pb-3">Email Address</th>
+                  <th className="pb-3">Phone</th>
+                  <th className="pb-3">Role</th>
+                  <th className="pb-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {usersList.map((usr) => (
+                  <tr key={usr.id}>
+                    <td className="py-3 font-bold text-[#172C3D]">{usr.name}</td>
+                    <td className="py-3 text-gray-600">{usr.email}</td>
+                    <td className="py-3 text-gray-500">{usr.phone || 'N/A'}</td>
+                    <td className="py-3">
+                      <span className={`px-2.5 py-1 text-[10px] font-bold rounded-full uppercase ${
+                        usr.role === 'admin' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-[#075B46]'
+                      }`}>
+                        {usr.role}
+                      </span>
+                    </td>
+                    <td className="py-3 text-right">
+                      <button 
+                        onClick={() => notify(`Updated permissions for ${usr.name}`)} 
+                        className="text-xs text-blue-600 hover:underline font-semibold"
+                      >
+                        Edit Role
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {adminTab === 'projects' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Add Project Form */}
+          <div className="lg:col-span-4 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+            <h3 className="text-base font-bold text-[#172C3D]">Publish New Campaign</h3>
+            <form onSubmit={handleAddProject} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Project Title</label>
+                <input 
+                  type="text" 
+                  required
+                  value={newProjTitle}
+                  onChange={(e) => setNewProjTitle(e.target.value)}
+                  placeholder="e.g. Rural Solar Wells" 
+                  className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Funding Goal ($)</label>
+                <input 
+                  type="number" 
+                  required
+                  value={newProjGoal}
+                  onChange={(e) => setNewProjGoal(e.target.value)}
+                  placeholder="25000" 
+                  className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl"
+                />
+              </div>
+              <button type="submit" className="w-full py-2.5 bg-[#138A63] text-white text-xs font-bold rounded-xl shadow-xs">
+                Publish Project
+              </button>
+            </form>
+          </div>
+
+          {/* Existing Projects List */}
+          <div className="lg:col-span-8 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+            <h3 className="text-base font-bold text-[#172C3D]">Active System Campaigns</h3>
+            <div className="space-y-3">
+              {projects.map((p) => (
+                <div key={p.id} className="p-4 border border-gray-100 rounded-2xl flex items-center justify-between">
+                  <div>
+                    <h4 className="font-bold text-sm text-[#172C3D]">{p.title}</h4>
+                    <p className="text-xs text-gray-500">Goal: ${p.goal.toLocaleString()} • Raised: ${p.raised.toLocaleString()}</p>
+                  </div>
+                  <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">{p.status}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
+
+// ==========================================
+// MODALS (DONATION & EVENT DETAILS)
+// ==========================================
+function DonateModal({ project, closeModal, onSuccess }) {
+  const [amount, setAmount] = useState('100');
+  const [donorName, setDonorName] = useState('');
+  const [donorEmail, setDonorEmail] = useState('');
+  const [selectedProgram, setSelectedProgram] = useState(project ? project.title : 'Education for All');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!amount || !donorName) return;
+
+    const donationData = {
+      id: `DON-${Math.floor(1000 + Math.random() * 9000)}`,
+      donorName,
+      amount: Number(amount),
+      program: selectedProgram,
+      date: new Date().toISOString().split('T')[0],
+      status: 'Completed',
+      receiptNo: `REC-2026-${Math.floor(100 + Math.random() * 900)}`
+    };
+
+    onSuccess(donationData);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+      <div className="bg-white max-w-lg w-full rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative border border-gray-100">
+        <button onClick={closeModal} className="absolute top-5 right-5 text-gray-400 hover:text-gray-600">
+          <X className="w-6 h-6" />
+        </button>
+
+        <div className="space-y-1">
+          <span className="text-xs font-bold text-emerald-700 uppercase">Interactive Demo Gateway</span>
+          <h3 className="text-2xl font-extrabold text-[#172C3D]">Make a Impact Donation</h3>
+          <p className="text-xs text-gray-500">All contributions qualify for 80G Tax Deductions.</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-gray-700 uppercase mb-1 font-sans">Select Amount ($)</label>
+            <div className="grid grid-cols-4 gap-2 mb-2">
+              {['25', '50', '100', '250'].map((val) => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => setAmount(val)}
+                  className={`py-2 text-xs font-bold rounded-xl border transition ${
+                    amount === val ? 'bg-[#075B46] text-white border-[#075B46]' : 'border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  ${val}
+                </button>
+              ))}
+            </div>
+            <input 
+              type="number" 
+              required
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="Custom Amount"
+              className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#138A63]"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Target Program</label>
+            <select 
+              value={selectedProgram}
+              onChange={(e) => setSelectedProgram(e.target.value)}
+              className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#138A63]"
+            >
+              <option value="Education for All">Education for All</option>
+              <option value="Community Healthcare">Community Healthcare</option>
+              <option value="Environmental Protection">Environmental Protection</option>
+              <option value="Clean Rivers Initiative">Clean Rivers Initiative</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Your Full Name</label>
+            <input 
+              type="text" 
+              required
+              value={donorName}
+              onChange={(e) => setDonorName(e.target.value)}
+              placeholder="Sarah Jenkins"
+              className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#138A63]"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Email for Receipt</label>
+            <input 
+              type="email" 
+              required
+              value={donorEmail}
+              onChange={(e) => setDonorEmail(e.target.value)}
+              placeholder="sarah@example.com"
+              className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#138A63]"
+            />
+          </div>
+
+          <button 
+            type="submit" 
+            className="w-full py-3.5 bg-gradient-to-r from-coral to-[#FF876F] text-white font-bold rounded-xl shadow-lg hover:opacity-95 transition"
+          >
+            Process Demo Donation (${amount})
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function EventDetailModal({ event, closeModal, currentUser, navigateTo, notify }) {
+  const handleRegisterEvent = () => {
+    if (!currentUser) {
+      notify('Please log in or register to complete event sign-up.', 'error');
+      closeModal();
+      navigateTo('login');
+    } else {
+      notify(`Success! ${currentUser.name} registered for ${event.title}`);
+      closeModal();
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+      <div className="bg-white max-w-lg w-full rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative border border-gray-100">
+        <button onClick={closeModal} className="absolute top-5 right-5 text-gray-400 hover:text-gray-600">
+          <X className="w-6 h-6" />
+        </button>
+
+        <span className="px-3 py-1 bg-[#DFF7E9] text-[#075B46] text-xs font-bold rounded-lg uppercase">
+          {event.category}
+        </span>
+
+        <div>
+          <h3 className="text-2xl font-extrabold text-[#172C3D]">{event.title}</h3>
+          <p className="text-xs text-gray-600 mt-2 leading-relaxed">{event.description}</p>
+        </div>
+
+        <div className="space-y-2 text-xs text-gray-600 border-y border-gray-100 py-4 font-semibold">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-[#138A63]" /> Date & Time: {event.date} ({event.time})
+          </div>
+          <div className="flex items-center gap-2">
+            <Globe className="w-4 h-4 text-[#138A63]" /> Location: {event.location}
+          </div>
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4 text-[#138A63]" /> Attending: {event.registeredCount} Volunteers
+          </div>
+        </div>
+
+        <div className="flex gap-3">
+          <button onClick={closeModal} className="w-1/2 py-3 border border-gray-200 font-bold text-gray-600 text-xs rounded-xl">
+            Close
+          </button>
+          <button onClick={handleRegisterEvent} className="w-1/2 py-3 bg-[#138A63] text-white font-bold text-xs rounded-xl shadow-md">
+            Confirm Registration
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// FOOTER COMPONENT
+// ==========================================
+function Footer({ navigateTo }) {
+  return (
+    <footer className="bg-[#172C3D] text-white border-t border-emerald-900/30 pt-16 pb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+          
+          {/* Org Info */}
+          <div className="md:col-span-5 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-[#138A63] flex items-center justify-center">
+                <Heart className="w-5 h-5 fill-current text-white" />
+              </div>
+              <span className="text-2xl font-extrabold">Ujjwal Foundation</span>
+            </div>
+            <p className="text-xs text-gray-300 leading-relaxed max-w-sm">
+              Ujjwal Foundation is a registered non-profit working relentlessly towards grassroot community empowerment, quality education, and clean ecosystems.
+            </p>
+          </div>
+
+          {/* Quick Links */}
+          <div className="md:col-span-3 space-y-3 text-xs">
+            <h4 className="font-bold text-emerald-400 uppercase tracking-wider">Quick Links</h4>
+            <ul className="space-y-2 text-gray-300">
+              <li><a href="#about" className="hover:text-white">About Organization</a></li>
+              <li><a href="#programs" className="hover:text-white">Core Programs</a></li>
+              <li><a href="#projects" className="hover:text-white">Active Projects</a></li>
+              <li><a href="#events" className="hover:text-white">Volunteer Events</a></li>
+            </ul>
+          </div>
+
+          {/* Contact Details */}
+          <div className="md:col-span-4 space-y-3 text-xs text-gray-300">
+            <h4 className="font-bold text-emerald-400 uppercase tracking-wider">Headquarters Contact</h4>
+            <p>📍 Sector 14, Social Welfare Zone, New Delhi, India</p>
+            <p>📧 contact@ujjwal.org</p>
+            <p>📞 +91 (011) 2450-8900</p>
+          </div>
+        </div>
+
+        <div className="pt-8 border-t border-gray-800 text-center text-xs text-gray-400 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>© 2026 Ujjwal Foundation. All rights reserved. Registered 80G Non-Profit Organization.</div>
+          <div className="flex gap-4">
+            <a href="#" className="hover:underline">Privacy Policy</a>
+            <a href="#" className="hover:underline">Terms of Service</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
